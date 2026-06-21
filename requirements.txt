@@ -1,0 +1,18 @@
+# Frameworks deep learning
+torch>=2.0.0
+transformers>=4.40.0
+accelerate>=0.25.0
+
+# Codec audio SNAC (utilisé par Orpheus TTS)
+snac>=1.0
+
+# Lecture / écriture de fichiers audio
+soundfile>=0.12.1
+librosa>=0.10.0
+
+# Lecture audio en temps réel (optionnel — pour --play)
+sounddevice>=0.4.6
+
+# Utilitaires
+numpy>=1.24.0
+scipy>=1.11.0
