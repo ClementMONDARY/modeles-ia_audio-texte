@@ -74,21 +74,6 @@ Options :
   --llm-model HF_MODEL  Modèle LLM alternatif (défaut : TinyLlama-1.1B-Chat)
 ```
 
-### Exemples
-
-```bash
-# Pipeline complet avec lecture automatique
-python main.py samples/question.wav --output reponse.wav --play
-
-# Choisir une voix différente
-python main.py samples/question.wav --voice leo
-
-# Utiliser un modèle Whisper plus léger (si peu de VRAM)
-python main.py samples/question.wav --stt-model openai/whisper-medium
-```
-
----
-
 ## Structure du projet
 
 ```
@@ -100,56 +85,3 @@ modeles-ia_audio-texte/
 ├── requirements.txt # Dépendances Python
 └── samples/         # Dossier pour les fichiers audio d'entrée
 ```
-
----
-
-## Fonctionnement détaillé
-
-### Étape 1 — Speech-to-Text (Whisper)
-
-Whisper charge le fichier audio, le découpe en segments et le transcrit en texte.
-Il détecte automatiquement la langue parlée. La version `large-v3` offre les meilleures
-performances mais nécessite ~3 Go de VRAM. Utilisez `whisper-medium` (1,5 Go) ou
-`whisper-small` (500 Mo) si les ressources sont limitées.
-
-### Étape 2 — Text-to-Text (TinyLlama)
-
-TinyLlama reçoit la transcription comme message utilisateur et génère une réponse.
-Le modèle fonctionne en anglais. Si l'audio est en français, la transcription est
-correcte mais la réponse sera en anglais (comportement normal pour ce modèle).
-
-Pour une réponse en français, remplacez par un modèle francophone :
-```bash
-python main.py audio.wav --llm-model "mistralai/Mistral-7B-Instruct-v0.3"
-```
-
-### Étape 3 — Text-to-Speech (Orpheus)
-
-Orpheus est un LLM de 3 milliards de paramètres qui génère des tokens audio au lieu
-de tokens texte. Ces tokens suivent la structure du codec SNAC (3 niveaux hiérarchiques),
-qui les décode en signal audio à 24 kHz. Le modèle supporte 6 voix en anglais.
-
----
-
-## Ressources matérielles recommandées
-
-| Configuration | STT | LLM | TTS | Total VRAM |
-|---|---|---|---|---|
-| Légère (CPU) | whisper-small | TinyLlama | — | — |
-| Minimale (GPU) | whisper-medium | TinyLlama | Orpheus | ~8 Go |
-| Complète (GPU) | whisper-large-v3 | TinyLlama | Orpheus | ~12 Go |
-
-Les modèles sont téléchargés automatiquement depuis HuggingFace lors du premier lancement
-et mis en cache localement (`~/.cache/huggingface/`).
-
----
-
-## Dépannage
-
-**`CUDA out of memory`** — Réduire la taille des modèles ou ajouter `--stt-model openai/whisper-small`.
-
-**`snac` introuvable** — Vérifier l'installation : `pip install snac`.
-
-**Lecture audio impossible (`--play`)** — Installer sounddevice : `pip install sounddevice`.
-
-**Orpheus génère un audio silencieux** — Le texte d'entrée doit être en anglais et de longueur raisonnable (10-200 mots).
